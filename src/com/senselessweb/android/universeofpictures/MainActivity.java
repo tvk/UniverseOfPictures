@@ -7,9 +7,11 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import android.app.Activity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.senselessweb.android.universeofpictures.scene.Picture;
 import com.senselessweb.android.universeofpictures.scene.RenderableScene;
 import com.threed.jpct.Logger;
 
@@ -66,7 +68,24 @@ public class MainActivity extends Activity
 		super.onResume();
 		this.mGLView.onResume();
 	}
-
+	
+	@Override
+	public boolean onTouchEvent(final MotionEvent event)
+	{
+		final Picture picture = scene.findTouchedPicture((int) event.getX(), (int) event.getY());
+		
+		if (picture == null)
+		{
+			scene.startCameraAnimation();
+		}
+		else
+		{
+			// TODO
+		}
+		
+		return true;
+	}
+	
 	@Override
 	protected void onStop()
 	{

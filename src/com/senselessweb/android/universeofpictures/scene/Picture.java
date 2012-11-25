@@ -28,6 +28,10 @@ public class Picture extends Object3D
 
 		this.setTranslationMatrix(m);
 		
+		this.build();
+		this.compile();
+		
+		this.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
 
 	}
 }
