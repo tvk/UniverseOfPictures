@@ -51,6 +51,8 @@ public class RenderableScene extends World implements Renderer
 		this.planet.calcTextureWrapSpherical();
 		this.planet.setTexture("texture");
 		this.addObject(this.planet);
+		
+		RenderableScene.this.planet.rotateY((float) (Math.PI * 0.75));
 
 		this.camera = this.getCamera();
 		//this.camera.setPosition(-100, -100, -700); // far
@@ -58,12 +60,8 @@ public class RenderableScene extends World implements Renderer
 		this.camera.setPosition(190, -5, -40); // near
 
 		for (float angle = 0f; angle < Math.PI * 2.0; angle += 0.2f)
-		{
 			for (int n = 0; n <= 6; n++)
-			{
 				this.planet.addChild(new Picture(this, n, angle));
-			}
-		}
 
 		this.planet.strip();
 		this.planet.build();

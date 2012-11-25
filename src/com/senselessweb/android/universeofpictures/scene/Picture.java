@@ -27,8 +27,9 @@ public class Picture extends Object3D
 		this.addChild(plane);
 
 		this.setTexture("testfoto");
-		this.rotateY((float) (-Math.PI / 4.0));
 		
+		// These transformations don't make sense in my opinion, but there're working :)
+		this.rotateY((float) (-Math.PI / 4.0 + angle));
 		final Matrix m = new Matrix();
 		m.translate(160 + orbitIndex * pictureDistance, 0, 0);
 		m.rotateY(angle);
