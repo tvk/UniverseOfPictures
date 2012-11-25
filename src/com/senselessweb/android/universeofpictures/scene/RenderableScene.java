@@ -55,13 +55,13 @@ public class RenderableScene extends World implements Renderer
 		RenderableScene.this.planet.rotateY((float) (Math.PI * 0.75));
 
 		this.camera = this.getCamera();
-		//this.camera.setPosition(-100, -100, -700); // far
-		//this.camera.lookAt(this.planet.getCenter());
-		this.camera.setPosition(190, -5, -40); // near
+		this.camera.setPosition(-100, -100, -700); // far
+		this.camera.lookAt(this.planet.getCenter());
+		//this.camera.setPosition(140, -5, -60); // near
 
-		for (float angle = 0f; angle < Math.PI * 2.0; angle += 0.2f)
+		for (float angle = 0f; angle < Math.PI * 2.0; angle += 0.12f)
 			for (int n = 0; n <= 6; n++)
-				this.planet.addChild(new Picture(this, n, angle));
+				this.planet.addChild(new Picture(this, n, angle + n%2 * 0.06f));
 
 		this.planet.strip();
 		this.planet.build();

@@ -14,24 +14,16 @@ public class Picture extends Object3D
 
 	public Picture(final RenderableScene parent, final int orbitIndex, final float angle)
 	{
-		super(Primitives.getBox(pictureScale, 0.01f));
+		super(Primitives.getPlane(pictureScale * 2, 1f));
 		parent.addObject(this);
-
-		final Object3D plane = Primitives.getPlane(pictureScale * 2, 1f);
-		parent.addObject(plane);
-
-		plane.setTexture("testfoto");
-		plane.rotateX((float) (Math.PI / 2.0));
-		plane.rotateY((float) (Math.PI / 4.0));
-		plane.translate(0, -0.1f, 0);
-		this.addChild(plane);
 
 		this.setTexture("testfoto");
 		
 		// These transformations don't make sense in my opinion, but there're working :)
-		this.rotateY((float) (-Math.PI / 4.0 + angle));
+		this.rotateX((float) (Math.PI / 2.0));
+		this.rotateY(angle);
 		final Matrix m = new Matrix();
-		m.translate(160 + orbitIndex * pictureDistance, 0, 0);
+		m.translate(140 + orbitIndex * pictureDistance, 0, 0);
 		m.rotateY(angle);
 
 		this.setTranslationMatrix(m);
