@@ -82,7 +82,7 @@ public class CameraAnimator
 				
 				camera.setPosition(endPosition);
 				camera.setOrientation(endLookAt, camera.getUpVector());
-				animationRunning = false;
+				//animationRunning = false;
 			}
 		});
 		

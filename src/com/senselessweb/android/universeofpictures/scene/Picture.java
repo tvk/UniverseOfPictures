@@ -11,13 +11,16 @@ public class Picture extends Object3D
 	private static final int pictureDistance = 2 * pictureScale + 2;
 
 	private static final long serialVersionUID = 9018072087016918351L;
+	
+	private final String pictureTexture;
 
 	public Picture(final RenderableScene parent, final int orbitIndex, final float angle)
 	{
 		super(Primitives.getPlane(pictureScale * 2, 1f));
+		this.pictureTexture = PictureTextures.instance.nextTexture();
+		this.setTexture(this.pictureTexture);
+		
 		parent.addObject(this);
-
-		this.setTexture("testfoto");
 		
 		// These transformations don't make sense in my opinion, but there're working :)
 		this.rotateX((float) (Math.PI / 2.0));
@@ -33,5 +36,10 @@ public class Picture extends Object3D
 		
 		this.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
 
+	}
+	
+	public String getPictureTexture()
+	{
+		return pictureTexture;
 	}
 }

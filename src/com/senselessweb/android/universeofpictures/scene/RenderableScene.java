@@ -7,6 +7,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView.Renderer;
+import android.util.Log;
 
 import com.senselessweb.android.universeofpictures.R;
 import com.threed.jpct.FrameBuffer;
@@ -52,9 +53,6 @@ public class RenderableScene extends World implements Renderer
 		final Texture texture = new Texture(BitmapHelper.rescale(BitmapHelper.convert(context.getResources().getDrawable(R.drawable.texture_planet)), 512, 256));
 		TextureManager.getInstance().addTexture("texture", texture);
 
-		final Texture testfoto = new Texture(BitmapHelper.rescale(BitmapHelper.convert(context.getResources().getDrawable(R.drawable.testfoto)), 256, 256));
-		TextureManager.getInstance().addTexture("testfoto", testfoto);
-
 		this.planet = Primitives.getSphere(60, 100);
 		this.planet.calcTextureWrapSpherical();
 		this.planet.setTexture("texture");
@@ -62,9 +60,16 @@ public class RenderableScene extends World implements Renderer
 
 		RenderableScene.this.planet.rotateY((float) (Math.PI * 0.75));
 
+		int counter = 0;
 		for (float angle = 0f; angle < Math.PI * 2.0; angle += 0.12f)
+		{
 			for (int n = 0; n <= 6; n++)
+			{
 				this.planet.addChild(new Picture(this, n, angle + n % 2 * 0.06f));
+				counter++;
+			}
+		}
+		Log.i(RenderableScene.class.getCanonicalName(), "Created " + counter + " userpictures");
 
 		this.planet.strip();
 		this.planet.build();
@@ -123,8 +128,8 @@ public class RenderableScene extends World implements Renderer
 
 	public Picture findTouchedPicture(int x, int y)
 	{
-		SimpleVector dir = Interact2D.reproject2D3DWS(this.getCamera(), this.frameBuffer, x, y).normalize();
-		Object[] res = this.calcMinDistanceAndObject3D(this.getCamera().getPosition(), dir, 10000);
+		final SimpleVector dir = Interact2D.reproject2D3DWS(this.getCamera(), this.frameBuffer, x, y).normalize();
+		final Object[] res = this.calcMinDistanceAndObject3D(this.getCamera().getPosition(), dir, 10000);
 
 		if (res[1] instanceof Picture)
 			return (Picture) res[1];

@@ -25,7 +25,6 @@ public class MainActivity extends Activity
 	@Override
 	protected void onCreate(final Bundle savedInstanceState)
 	{
-
 		Logger.log("onCreate");
 		super.onCreate(savedInstanceState);
 
