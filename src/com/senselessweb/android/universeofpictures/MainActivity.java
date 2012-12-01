@@ -8,10 +8,12 @@ import android.app.Activity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 
-import com.senselessweb.android.universeofpictures.scene.Picture;
 import com.senselessweb.android.universeofpictures.scene.RenderableScene;
 import com.threed.jpct.Logger;
 
@@ -49,9 +51,12 @@ public class MainActivity extends Activity
 				return configs[0];
 			}
 		});
-
+		
 		this.mGLView.setRenderer(scene);
+		
 		this.setContentView(this.mGLView);
+		this.addContentView(this.getLayoutInflater().inflate(R.layout.activity_main, null), 
+				new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 	}
 
 	@Override
@@ -71,17 +76,12 @@ public class MainActivity extends Activity
 	@Override
 	public boolean onTouchEvent(final MotionEvent event)
 	{
-		final Picture picture = scene.findTouchedPicture((int) event.getX(), (int) event.getY());
+		final ImageView imageView = (ImageView) this.findViewById(R.id.imageView1);
 		
-		if (picture == null)
-		{
-			scene.startCameraAnimation();
-		}
+		if (imageView.getVisibility() == View.VISIBLE)
+			imageView.setVisibility(View.INVISIBLE);
 		else
-		{
-			// TODO
-		}
-		
+			scene.onTouch(this.mGLView, event, imageView);
 		return true;
 	}
 	
@@ -90,10 +90,15 @@ public class MainActivity extends Activity
 	{
 		super.onStop();
 	}
+	
+	@Override
+	public void onBackPressed()
+	{
+		scene.onBackPressed();
+	}
 
 	protected boolean isFullscreenOpaque()
 	{
 		return true;
 	}
-
 }

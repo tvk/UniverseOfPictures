@@ -9,5 +9,6 @@
 			<attribute name="javadoc_location" value="file:/home/data/development/android/jpct-ae/doc/com/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="libs/guava-13.0.1.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

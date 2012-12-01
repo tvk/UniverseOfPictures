@@ -1,20 +1,26 @@
 package com.senselessweb.android.universeofpictures.scene;
 
-import java.util.concurrent.Executors;
+import java.util.Arrays;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
+import android.opengl.GLSurfaceView;
 import android.opengl.GLSurfaceView.Renderer;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.widget.ImageView;
 
 import com.senselessweb.android.universeofpictures.R;
+import com.senselessweb.android.universeofpictures.common.Point;
+import com.senselessweb.android.universeofpictures.scene.objects.RenderableAlbum;
+import com.senselessweb.android.universeofpictures.scene.objects.TouchableObject;
+import com.senselessweb.android.universeofpictures.service.AlbumService;
+import com.senselessweb.android.universeofpictures.service.AnimatedCamera;
 import com.threed.jpct.FrameBuffer;
 import com.threed.jpct.Interact2D;
 import com.threed.jpct.Light;
-import com.threed.jpct.Object3D;
-import com.threed.jpct.Primitives;
 import com.threed.jpct.RGBColor;
 import com.threed.jpct.SimpleVector;
 import com.threed.jpct.Texture;
@@ -34,78 +40,28 @@ public class RenderableScene extends World implements Renderer
 	private final SkyBox skybox;
 
 	private final Light sun;
-
-	private final Object3D planet;
 	
-	private final CameraAnimator cameraAnimator;
+	private final AlbumService albumService;
+	
+	private Point<Float> lastTouchPosition = null;
 
 	public RenderableScene(final Context context)
 	{
-
+		
 		final Texture skyTexture = new Texture(BitmapHelper.rescale(BitmapHelper.convert(context.getResources().getDrawable(R.drawable.sky)), 512, 512));
 		TextureManager.getInstance().addTexture("sky", skyTexture);
-		this.skybox = new SkyBox("sky", "sky", "sky", "sky", "sky", "sky", 10000);
+		this.skybox = new SkyBox("sky", "sky", "sky", "sky", "sky", "sky", 100000);
 
 		this.sun = new Light(this);
 		this.sun.setPosition(new SimpleVector(10000, 0, -2000));
 		this.sun.setIntensity(255f, 255f, 255f);
-
-		final Texture texture = new Texture(BitmapHelper.rescale(BitmapHelper.convert(context.getResources().getDrawable(R.drawable.texture_planet)), 512, 256));
-		TextureManager.getInstance().addTexture("texture", texture);
-
-		this.planet = Primitives.getSphere(60, 100);
-		this.planet.calcTextureWrapSpherical();
-		this.planet.setTexture("texture");
-		this.addObject(this.planet);
-
-		RenderableScene.this.planet.rotateY((float) (Math.PI * 0.75));
-
-		int counter = 0;
-		for (float angle = 0f; angle < Math.PI * 2.0; angle += 0.12f)
-		{
-			for (int n = 0; n <= 6; n++)
-			{
-				this.planet.addChild(new Picture(this, n, angle + n % 2 * 0.06f));
-				counter++;
-			}
-		}
-		Log.i(RenderableScene.class.getCanonicalName(), "Created " + counter + " userpictures");
-
-		this.planet.strip();
-		this.planet.build();
-
+		
+		this.albumService = new AlbumService(context, this);
+		this.addObjects(this.albumService.getAlbums().toArray(new RenderableAlbum[0]));
+		
+		AnimatedCamera.init(this.getCamera());
+		
 		MemoryHelper.compact();
-
-		this.cameraAnimator = new CameraAnimator(this.getCamera(), planet);
-		this.animate();
-	}
-
-	public void animate()
-	{
-		Executors.newSingleThreadExecutor().execute(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				while (true)
-				{
-					RenderableScene.this.planet.rotateY(0.005f);
-					try
-					{
-						Thread.sleep(100);
-					} catch (final InterruptedException e)
-					{
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-	}
-
-	@Override
-	public void onSurfaceCreated(final GL10 gl, final EGLConfig config)
-	{
-		// TODO Auto-generated method stub
 	}
 
 	@Override
@@ -126,19 +82,48 @@ public class RenderableScene extends World implements Renderer
 		this.frameBuffer.display();
 	}
 
-	public Picture findTouchedPicture(int x, int y)
+	public synchronized void onTouch(final GLSurfaceView view, final MotionEvent event, final ImageView pictureView)
 	{
-		final SimpleVector dir = Interact2D.reproject2D3DWS(this.getCamera(), this.frameBuffer, x, y).normalize();
-		final Object[] res = this.calcMinDistanceAndObject3D(this.getCamera().getPosition(), dir, 10000);
-
-		if (res[1] instanceof Picture)
-			return (Picture) res[1];
-
-		return null;
+		if (event.getAction() == MotionEvent.ACTION_DOWN)
+		{
+			this.lastTouchPosition = new Point<Float>(event.getX(), event.getY());
+		}
+		else if (event.getAction() == MotionEvent.ACTION_MOVE)
+		{
+			final Point<Float> newPosition = new Point<Float>(event.getX(), event.getY());
+			final float dx = this.lastTouchPosition.getX() - newPosition.getX();
+			final float dy = this.lastTouchPosition.getY() - newPosition.getY();
+			
+			this.getCamera().rotateCameraY(dx / 300.0f);
+			this.getCamera().rotateCameraX(dy / 300.0f);
+			
+			this.lastTouchPosition = newPosition;
+		}
+		else if (event.getAction() == MotionEvent.ACTION_UP)
+		{
+			// Find the touched object
+			final int x = (int) event.getX();
+			final int y = (int) event.getY();
+			final SimpleVector dir = Interact2D.reproject2D3DWS(this.getCamera(), this.frameBuffer, x, y).normalize();
+			final Object[] res = this.calcMinDistanceAndObject3D(this.getCamera().getPosition(), dir, 100000);
+			Log.i("RenderableScene", "Located object (Dir: " + dir + "): " + Arrays.toString(res));
+			
+			// Touchable objects handle events by their self
+			if (res[1] instanceof TouchableObject)
+				((TouchableObject) res[1]).handleTouchEvent();
+		}
 	}
 	
-	public void startCameraAnimation()
+	public void onBackPressed()
 	{
-		this.cameraAnimator.startAnimation();
+		AnimatedCamera.getInstance().moveToStartPosition();
+		
+		for (final RenderableAlbum album : this.albumService.getAlbums())
+			album.setPicturesVisibilityState(false);
 	}
+	
+	@Override
+	public void onSurfaceCreated(final GL10 gl, final EGLConfig config) { }
+	
+	
 }
