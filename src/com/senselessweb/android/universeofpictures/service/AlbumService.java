@@ -23,7 +23,10 @@ public class AlbumService
 	
 	private static final int[] textureIds = new int[] {
 		R.drawable.texture_planet_1,
-		R.drawable.texture_planet_2
+		R.drawable.texture_planet_2,
+		R.drawable.texture_planet_3,
+		R.drawable.texture_planet_4,
+		R.drawable.texture_planet_5
 	};
 	
 	private static final Album dummyAlbum = new LocalFolderAlbum(new File(Environment.getExternalStorageDirectory(), "example-images"));
