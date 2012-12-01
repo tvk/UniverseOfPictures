@@ -44,6 +44,9 @@ public class AlbumService
 					context.getResources().getDrawable(textureIds[i])), 512, 512));
 			TextureManager.getInstance().addTexture("texture_planet_" + i, texture);
 		}
+		final Texture backsideTexture = new Texture(BitmapHelper.rescale(BitmapHelper.convert(
+				context.getResources().getDrawable(R.drawable.backside)), 512, 512));
+		TextureManager.getInstance().addTexture("backside", backsideTexture);
 
 		// Create albums
 		for (int i = 0; i < 12; i++)

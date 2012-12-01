@@ -77,10 +77,12 @@ public class RenderableAlbum extends Object3D implements TouchableObject
 		int orbitIndex = 0;
 		for (final List<AlbumPicture> picturesOnOrbitLane : picturesOnOrbitLanes)
 		{
+			final float startAngle = (float) Math.random();
 			for (int i = 0; i < picturesOnOrbitLane.size(); i++)
 			{
-				final float angle = (float) (Math.PI * 2 * i / picturesOnOrbitLane.size());
-				final RenderablePicture renderablePicture = new RenderablePicture(picturesOnOrbitLane.get(i), 70 + orbitIndex * 5, angle);
+				final float angle = startAngle + (float) (Math.PI * 2 * i / picturesOnOrbitLane.size());
+				final RenderablePicture renderablePicture = new RenderablePicture(
+						RenderableAlbum.this.world, picturesOnOrbitLane.get(i), 70 + orbitIndex * 5, angle);
 				renderablePicture.setVisibility(false);
 				RenderableAlbum.this.addChild(renderablePicture);
 				RenderableAlbum.this.renderablePictures.add(renderablePicture);
@@ -88,7 +90,6 @@ public class RenderableAlbum extends Object3D implements TouchableObject
 			orbitIndex++;
 		}
 
-		RenderableAlbum.this.world.addObjects(RenderableAlbum.this.renderablePictures.toArray(new RenderablePicture[0]));
 		RenderableAlbum.this.strip();
 		RenderableAlbum.this.build();
 		RenderableAlbum.this.compile();
@@ -130,5 +131,11 @@ public class RenderableAlbum extends Object3D implements TouchableObject
 				}
 			}
 		});
+	}
+
+	@Override
+	public void notifyAnotherObjectHasBeenTouched()
+	{
+		this.setPicturesVisibilityState(false);
 	}
 }

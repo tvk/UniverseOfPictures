@@ -4,4 +4,6 @@ public interface TouchableObject
 {
 
 	public void handleTouchEvent(); 
+	
+	public void notifyAnotherObjectHasBeenTouched();
 }

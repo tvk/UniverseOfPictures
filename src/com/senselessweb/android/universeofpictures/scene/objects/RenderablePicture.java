@@ -5,6 +5,7 @@ import com.senselessweb.android.universeofpictures.service.TextureLoader;
 import com.threed.jpct.Matrix;
 import com.threed.jpct.Object3D;
 import com.threed.jpct.Primitives;
+import com.threed.jpct.World;
 
 public class RenderablePicture extends Object3D implements TouchableObject
 {
@@ -15,9 +16,17 @@ public class RenderablePicture extends Object3D implements TouchableObject
 	
 	private boolean textureLoaded = false;
 	
-	public RenderablePicture(final AlbumPicture picture, final float distance, final float angle)
+	private final Object3D backside;
+	
+	public RenderablePicture(final World world, final AlbumPicture picture, final float distance, final float angle)
 	{
 		super(Primitives.getPlane(4, 1f));
+		
+		this.backside = Primitives.getPlane(4, 1f);
+		this.backside.rotateY((float) Math.PI);
+		this.backside.setTexture("backside");
+		this.addChild(this.backside);
+		
 		this.picture = picture;
 		
 		// Apply transformations
@@ -29,10 +38,20 @@ public class RenderablePicture extends Object3D implements TouchableObject
 		this.setTranslationMatrix(m);
 		
 		this.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
+		
+		world.addObject(this);
+		world.addObject(backside);
 	}
 
 	@Override
 	public void handleTouchEvent()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void notifyAnotherObjectHasBeenTouched()
 	{
 		// TODO Auto-generated method stub
 		
@@ -51,6 +70,7 @@ public class RenderablePicture extends Object3D implements TouchableObject
 		}
 		
 		super.setVisibility(mode);
+		this.backside.setVisibility(mode);
 	}
 	
 }

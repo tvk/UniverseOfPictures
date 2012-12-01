@@ -45,6 +45,8 @@ public class RenderableScene extends World implements Renderer
 	
 	private Point<Float> lastTouchPosition = null;
 	
+	private TouchableObject lastTouchedObject = null;
+	
 	private boolean wasMoving = false;
 
 	public RenderableScene(final Context context)
@@ -121,7 +123,12 @@ public class RenderableScene extends World implements Renderer
 			
 			// Touchable objects handle events by their self
 			if (res[1] instanceof TouchableObject)
-				((TouchableObject) res[1]).handleTouchEvent();
+			{
+				if (this.lastTouchedObject != null)
+					this.lastTouchedObject.notifyAnotherObjectHasBeenTouched();
+				this.lastTouchedObject = (TouchableObject) res[1];
+				this.lastTouchedObject.handleTouchEvent();
+			}
 		}
 	}
 	
