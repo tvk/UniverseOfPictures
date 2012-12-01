@@ -44,13 +44,15 @@ public class RenderableScene extends World implements Renderer
 	private final AlbumService albumService;
 	
 	private Point<Float> lastTouchPosition = null;
+	
+	private boolean wasMoving = false;
 
 	public RenderableScene(final Context context)
 	{
 		
 		final Texture skyTexture = new Texture(BitmapHelper.rescale(BitmapHelper.convert(context.getResources().getDrawable(R.drawable.sky)), 512, 512));
 		TextureManager.getInstance().addTexture("sky", skyTexture);
-		this.skybox = new SkyBox("sky", "sky", "sky", "sky", "sky", "sky", 100000);
+		this.skybox = new SkyBox("sky", "sky", "sky", "sky", "sky", "sky", 1000000);
 
 		this.sun = new Light(this);
 		this.sun.setPosition(new SimpleVector(10000, 0, -2000));
@@ -84,6 +86,8 @@ public class RenderableScene extends World implements Renderer
 
 	public synchronized void onTouch(final GLSurfaceView view, final MotionEvent event, final ImageView pictureView)
 	{
+		Log.i("RenderableScene", "TouchEvent: " + event);
+		
 		if (event.getAction() == MotionEvent.ACTION_DOWN)
 		{
 			this.lastTouchPosition = new Point<Float>(event.getX(), event.getY());
@@ -98,9 +102,16 @@ public class RenderableScene extends World implements Renderer
 			this.getCamera().rotateCameraX(dy / 300.0f);
 			
 			this.lastTouchPosition = newPosition;
+			this.wasMoving = true;
 		}
 		else if (event.getAction() == MotionEvent.ACTION_UP)
 		{
+			if (this.wasMoving)
+			{
+				this.wasMoving = false;
+				return;
+			}
+
 			// Find the touched object
 			final int x = (int) event.getX();
 			final int y = (int) event.getY();

@@ -46,9 +46,22 @@ public class AlbumService
 		for (int i = 0; i < 12; i++)
 		{
 			final String texture = "texture_planet_" + (i % textureIds.length);
-			final SimpleVector position = new SimpleVector(0, 0, 800 + random.nextInt(200));
-			position.rotateX((float) (Math.random() * Math.PI * 2));
-			position.rotateY((float) (Math.random() * Math.PI * 2));
+			SimpleVector position = null;
+
+			// Check if we collide with another planet 
+			while (position == null)
+			{
+				final SimpleVector tempPosition = new SimpleVector(0, 0, 600 + random.nextInt(200));
+				tempPosition.rotateX((float) (Math.random() * Math.PI * 2));
+				tempPosition.rotateY((float) (Math.random() * Math.PI * 2));
+				
+				boolean positionOk = true;
+				for (final RenderableAlbum album : this.albums)
+					if (album.getTransformedCenter().distance(tempPosition) < 400f)
+						positionOk = false;
+				
+				if (positionOk) position = tempPosition;
+			}
 			
 			this.albums.add(new RenderableAlbum(world, dummyAlbum, texture, position));
 		}
