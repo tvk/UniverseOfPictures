@@ -37,7 +37,7 @@ public class RenderableAlbum extends Object3D implements TouchableObject
 	
 	public RenderableAlbum(final World world, final Album album, final String texture, final SimpleVector translation)
 	{
-		super(Primitives.getSphere(60, 60));
+		super(Primitives.getSphere(60, 30));
 		this.translate(translation);
 		
 		this.world = world;
@@ -82,7 +82,7 @@ public class RenderableAlbum extends Object3D implements TouchableObject
 			{
 				final float angle = startAngle + (float) (Math.PI * 2 * i / picturesOnOrbitLane.size());
 				final RenderablePicture renderablePicture = new RenderablePicture(
-						RenderableAlbum.this.world, picturesOnOrbitLane.get(i), 70 + orbitIndex * 5, angle);
+						RenderableAlbum.this.world, picturesOnOrbitLane.get(i), 35 + orbitIndex * 2.2f, angle);
 				renderablePicture.setVisibility(false);
 				RenderableAlbum.this.addChild(renderablePicture);
 				RenderableAlbum.this.renderablePictures.add(renderablePicture);
@@ -108,7 +108,7 @@ public class RenderableAlbum extends Object3D implements TouchableObject
 		this.setPicturesVisibilityState(true);
 		
 		AnimatedCamera.getInstance().moveTo(
-				this.getTransformedCenter().calcAdd(new SimpleVector(70.0 + this.numberOfOrbitLanes * 1.5, -3, -30)), 
+				this.getTransformedCenter().calcAdd(new SimpleVector(35.0 + this.numberOfOrbitLanes * 0.8f, -2, -15)), 
 				new SimpleVector(0, 0, 1));
 		
 	}
@@ -134,8 +134,9 @@ public class RenderableAlbum extends Object3D implements TouchableObject
 	}
 
 	@Override
-	public void notifyAnotherObjectHasBeenTouched()
+	public void notifyAnotherObjectHasBeenTouched(final TouchableObject object)
 	{
-		this.setPicturesVisibilityState(false);
+		if (object instanceof RenderableAlbum && object != this)
+			this.setPicturesVisibilityState(false);
 	}
 }

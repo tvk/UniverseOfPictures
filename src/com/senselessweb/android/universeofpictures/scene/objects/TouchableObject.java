@@ -5,5 +5,5 @@ public interface TouchableObject
 
 	public void handleTouchEvent(); 
 	
-	public void notifyAnotherObjectHasBeenTouched();
+	public void notifyAnotherObjectHasBeenTouched(final TouchableObject object);
 }

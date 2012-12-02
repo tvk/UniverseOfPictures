@@ -57,13 +57,13 @@ public class AlbumService
 			// Check if we collide with another planet 
 			while (position == null)
 			{
-				final SimpleVector tempPosition = new SimpleVector(0, 0, 600 + random.nextInt(200));
+				final SimpleVector tempPosition = new SimpleVector(0, 0, 300 + random.nextInt(100));
 				tempPosition.rotateX((float) (Math.random() * Math.PI * 2));
 				tempPosition.rotateY((float) (Math.random() * Math.PI * 2));
 				
 				boolean positionOk = true;
 				for (final RenderableAlbum album : this.albums)
-					if (album.getTransformedCenter().distance(tempPosition) < 400f)
+					if (album.getTransformedCenter().distance(tempPosition) < 200f)
 						positionOk = false;
 				
 				if (positionOk) position = tempPosition;

@@ -46,17 +46,28 @@ public class AnimatedCamera
 		
 		this.animatedTranslation = new BezierBasedCameraAnimation(
 				this.camera.getPosition(), this.camera.getDirection(),
-				newPosition, newDirection,
-				this.camera.getUpVector(), new SimpleVector(0f, -1f, 0f),
+				newPosition, newDirection, this.camera.getUpVector(),
 				20000)
 		{
 			
 			@Override
-			public void animate(final SimpleVector current, final SimpleVector direction, final SimpleVector up)
+			public void animatePosition(final SimpleVector positon)
 			{
-				AnimatedCamera.this.camera.setPosition(current);
+				AnimatedCamera.this.camera.setPosition(positon);
+			}
+
+			@Override
+			public void animateOrientation(final SimpleVector direction, final SimpleVector up)
+			{
 				AnimatedCamera.this.camera.setOrientation(direction, up);
 			}
+
+			@Override
+			public void animateLookAt(final SimpleVector lookAt)
+			{
+				AnimatedCamera.this.camera.lookAt(lookAt);
+			}
+			
 		};
 		
 		this.animatedTranslation.start();

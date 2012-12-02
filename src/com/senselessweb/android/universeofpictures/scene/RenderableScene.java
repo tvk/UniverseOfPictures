@@ -51,10 +51,9 @@ public class RenderableScene extends World implements Renderer
 
 	public RenderableScene(final Context context)
 	{
-		
-		final Texture skyTexture = new Texture(BitmapHelper.rescale(BitmapHelper.convert(context.getResources().getDrawable(R.drawable.sky)), 512, 512));
+		final Texture skyTexture = new Texture(BitmapHelper.rescale(BitmapHelper.convert(context.getResources().getDrawable(R.drawable.sky)), 2048, 2048));
 		TextureManager.getInstance().addTexture("sky", skyTexture);
-		this.skybox = new SkyBox("sky", "sky", "sky", "sky", "sky", "sky", 1000000);
+		this.skybox = new SkyBox("sky", "sky", "sky", "sky", "sky", "sky", 2000);
 
 		this.sun = new Light(this);
 		this.sun.setPosition(new SimpleVector(10000, 0, -2000));
@@ -122,10 +121,10 @@ public class RenderableScene extends World implements Renderer
 			Log.i("RenderableScene", "Located object (Dir: " + dir + "): " + Arrays.toString(res));
 			
 			// Touchable objects handle events by their self
-			if (res[1] instanceof TouchableObject)
+			if (res[1] instanceof TouchableObject && this.lastTouchedObject != res[1])
 			{
 				if (this.lastTouchedObject != null)
-					this.lastTouchedObject.notifyAnotherObjectHasBeenTouched();
+					this.lastTouchedObject.notifyAnotherObjectHasBeenTouched((TouchableObject) res[1]);
 				this.lastTouchedObject = (TouchableObject) res[1];
 				this.lastTouchedObject.handleTouchEvent();
 			}

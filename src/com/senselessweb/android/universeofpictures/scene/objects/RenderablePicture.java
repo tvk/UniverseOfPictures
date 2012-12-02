@@ -20,9 +20,9 @@ public class RenderablePicture extends Object3D implements TouchableObject
 	
 	public RenderablePicture(final World world, final AlbumPicture picture, final float distance, final float angle)
 	{
-		super(Primitives.getPlane(4, 1f));
+		super(Primitives.getPlane(2, 1f));
 		
-		this.backside = Primitives.getPlane(4, 1f);
+		this.backside = Primitives.getPlane(2, 1f);
 		this.backside.rotateY((float) Math.PI);
 		this.backside.setTexture("backside");
 		this.addChild(this.backside);
@@ -51,7 +51,7 @@ public class RenderablePicture extends Object3D implements TouchableObject
 	}
 	
 	@Override
-	public void notifyAnotherObjectHasBeenTouched()
+	public void notifyAnotherObjectHasBeenTouched(final TouchableObject object)
 	{
 		// TODO Auto-generated method stub
 		
