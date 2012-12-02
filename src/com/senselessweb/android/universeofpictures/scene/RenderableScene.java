@@ -1,6 +1,8 @@
 package com.senselessweb.android.universeofpictures.scene;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -43,7 +45,7 @@ public class RenderableScene extends World implements Renderer
 	
 	private final AlbumService albumService;
 	
-	private Point<Float> lastTouchPosition = null;
+	private List<Point<Float>> lastTouchPosition = null;
 	
 	private TouchableObject lastTouchedObject = null;
 	
@@ -87,22 +89,46 @@ public class RenderableScene extends World implements Renderer
 
 	public synchronized void onTouch(final GLSurfaceView view, final MotionEvent event, final ImageView pictureView)
 	{
-		Log.i("RenderableScene", "TouchEvent: " + event);
+		Log.d("RenderableScene", "TouchEvent: " + event);
 		
 		if (event.getAction() == MotionEvent.ACTION_DOWN)
 		{
-			this.lastTouchPosition = new Point<Float>(event.getX(), event.getY());
+			this.recordTouchPosition(event);
+		}
+		else if (event.getAction() == MotionEvent.ACTION_MOVE && event.getPointerCount() == 2)
+		{
+			if (this.lastTouchPosition != null && this.lastTouchPosition.size() == 2)
+			{
+				final float dxOld = this.lastTouchPosition.get(1).getX() - this.lastTouchPosition.get(0).getX();
+				final float dyOld = this.lastTouchPosition.get(1).getY() - this.lastTouchPosition.get(0).getY();
+				final float angleOld = (float) Math.atan(dyOld / dxOld);
+				
+				final float dxNew = event.getX(1) - event.getX(0);
+				final float dyNew = event.getY(1) - event.getY(0);
+				final float angleNew = (float) Math.atan(dyNew / dxNew);
+				
+				final float angleDiff = angleNew - angleOld;
+
+				Log.i("RenderableScene", "Rotating camera by " + angleDiff + " angleOld: " + angleOld + ", angleNew: " + angleNew);
+				if (!Float.isNaN(angleDiff)) this.getCamera().rotateCameraZ(angleDiff);
+			}
+			
+			this.recordTouchPosition(event);
+			this.wasMoving = true;
 		}
 		else if (event.getAction() == MotionEvent.ACTION_MOVE)
 		{
-			final Point<Float> newPosition = new Point<Float>(event.getX(), event.getY());
-			final float dx = this.lastTouchPosition.getX() - newPosition.getX();
-			final float dy = this.lastTouchPosition.getY() - newPosition.getY();
+			if (this.lastTouchPosition != null)
+			{
+				final Point<Float> newPosition = new Point<Float>(event.getX(), event.getY());
+				final float dx = this.lastTouchPosition.get(0).getX() - newPosition.getX();
+				final float dy = this.lastTouchPosition.get(0).getY() - newPosition.getY();
+				
+				this.getCamera().rotateCameraY(dx / 300.0f);
+				this.getCamera().rotateCameraX(dy / 300.0f);
+			}
 			
-			this.getCamera().rotateCameraY(dx / 300.0f);
-			this.getCamera().rotateCameraX(dy / 300.0f);
-			
-			this.lastTouchPosition = newPosition;
+			this.recordTouchPosition(event);
 			this.wasMoving = true;
 		}
 		else if (event.getAction() == MotionEvent.ACTION_UP)
@@ -128,7 +154,16 @@ public class RenderableScene extends World implements Renderer
 				this.lastTouchedObject = (TouchableObject) res[1];
 				this.lastTouchedObject.handleTouchEvent();
 			}
+			
+			this.lastTouchPosition = null;
 		}
+	}
+	
+	private void recordTouchPosition(final MotionEvent event)
+	{
+		this.lastTouchPosition = new ArrayList<Point<Float>>();
+		for (int i = 0; i < event.getPointerCount(); i++)
+			this.lastTouchPosition.add(new Point<Float>(event.getX(i), event.getY(i)));
 	}
 	
 	public void onBackPressed()
