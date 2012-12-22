@@ -6,17 +6,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 
+import javax.inject.Provider;
+
 import android.util.Log;
 
 import com.senselessweb.android.universeofpictures.common.Utils;
 import com.senselessweb.android.universeofpictures.domain.Album;
 import com.senselessweb.android.universeofpictures.domain.AlbumPicture;
+import com.senselessweb.android.universeofpictures.scene.Scene;
 import com.senselessweb.android.universeofpictures.service.AnimatedCamera;
-import com.senselessweb.android.universeofpictures.service.Rotator;
+import com.senselessweb.android.universeofpictures.service.TextureService;
 import com.threed.jpct.Object3D;
 import com.threed.jpct.Primitives;
 import com.threed.jpct.SimpleVector;
-import com.threed.jpct.World;
 
 public class RenderableAlbum extends Object3D implements TouchableObject
 {
@@ -25,7 +27,11 @@ public class RenderableAlbum extends Object3D implements TouchableObject
 	
 	private static final int picturesPerOrbitLane = 50;
 	
-	private final World world;
+	private final Scene scene;
+	
+	private final TextureService textureService;
+	
+	private final Provider<AnimatedCamera> camera;
 	
 	private final Album album;
 	
@@ -35,12 +41,19 @@ public class RenderableAlbum extends Object3D implements TouchableObject
 	
 	private Integer numberOfOrbitLanes = null;
 	
-	public RenderableAlbum(final World world, final Album album, final String texture, final SimpleVector translation)
+	public RenderableAlbum(final Scene scene, final TextureService textureService,
+			final Provider<AnimatedCamera> camera,
+			final Album album, final String texture, final SimpleVector translation)
 	{
+		
 		super(Primitives.getSphere(60, 30));
+		Log.i(this.toString(), "init called.. world:" + scene);
+		
 		this.translate(translation);
 		
-		this.world = world;
+		this.scene = scene;
+		this.textureService = textureService;
+		this.camera = camera;
 		this.album = album;
 		
 		// Apply planet texture
@@ -82,32 +95,33 @@ public class RenderableAlbum extends Object3D implements TouchableObject
 			{
 				final float angle = startAngle + (float) (Math.PI * 2 * i / picturesOnOrbitLane.size());
 				final RenderablePicture renderablePicture = new RenderablePicture(
-						RenderableAlbum.this.world, picturesOnOrbitLane.get(i), 35 + orbitIndex * 2.2f, angle);
+						this.scene, this.textureService, 
+						picturesOnOrbitLane.get(i), 35 + orbitIndex * 2.2f, angle);
 				renderablePicture.setVisibility(false);
-				RenderableAlbum.this.addChild(renderablePicture);
-				RenderableAlbum.this.renderablePictures.add(renderablePicture);
+				this.addChild(renderablePicture);
+				this.renderablePictures.add(renderablePicture);
 			}
 			orbitIndex++;
 		}
 
-		RenderableAlbum.this.strip();
-		RenderableAlbum.this.build();
-		RenderableAlbum.this.compile();
+		this.strip();
+		this.build();
+		this.compile();
 		
-		Log.i("RenderableAlbum", "All renderable pictures for album " + RenderableAlbum.this.album + " loaded");
+		Log.i(this.toString(), "All renderable pictures for album " + RenderableAlbum.this.album + " loaded");
 	}
 
 	@Override
 	public synchronized void handleTouchEvent()
 	{
-		Log.i("RenderableAlbum", "Planet '" + this.album + " has been touched.");
+		Log.i(this.toString(), "Planet '" + this.album + " has been touched.");
 		
 		if (this.numberOfOrbitLanes == null)
 			this.distributePictures();
 		
 		this.setPicturesVisibilityState(true);
 		
-		AnimatedCamera.getInstance().moveTo(
+		this.camera.get().moveTo(
 				this.getTransformedCenter().calcAdd(new SimpleVector(35.0 + this.numberOfOrbitLanes * 0.8f, -2, -15)), 
 				new SimpleVector(0, 0, 1));
 		

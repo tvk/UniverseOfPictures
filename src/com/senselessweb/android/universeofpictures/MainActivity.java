@@ -4,7 +4,8 @@ import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLDisplay;
 
-import android.app.Activity;
+import roboguice.RoboGuice;
+import roboguice.activity.RoboActivity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -15,23 +16,20 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.senselessweb.android.universeofpictures.scene.RenderableScene;
+import com.senselessweb.android.universeofpictures.service.AnimatedCamera;
 import com.threed.jpct.Logger;
 
-public class MainActivity extends Activity
+
+public class MainActivity extends RoboActivity
 {
-
+	
 	private GLSurfaceView mGLView;
-
-	private static RenderableScene scene;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState)
 	{
 		Logger.log("onCreate");
 		super.onCreate(savedInstanceState);
-
-		if (scene == null)
-			scene = new RenderableScene(this);
 
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -52,7 +50,7 @@ public class MainActivity extends Activity
 			}
 		});
 		
-		this.mGLView.setRenderer(scene);
+		this.mGLView.setRenderer(RoboGuice.getInjector(this.getApplicationContext()).getInstance(RenderableScene.class));
 		
 		this.setContentView(this.mGLView);
 		this.addContentView(this.getLayoutInflater().inflate(R.layout.activity_main, null), 
@@ -81,7 +79,7 @@ public class MainActivity extends Activity
 		if (imageView.getVisibility() == View.VISIBLE)
 			imageView.setVisibility(View.INVISIBLE);
 		else
-			scene.onTouch(this.mGLView, event, imageView);
+			RoboGuice.getInjector(this.getApplicationContext()).getInstance(RenderableScene.class).onTouch(this.mGLView, event, imageView);
 		return true;
 	}
 	
@@ -94,7 +92,7 @@ public class MainActivity extends Activity
 	@Override
 	public void onBackPressed()
 	{
-		scene.onBackPressed();
+		RoboGuice.getInjector(this.getApplicationContext()).getInstance(AnimatedCamera.class).moveToStartPosition();
 	}
 
 	protected boolean isFullscreenOpaque()

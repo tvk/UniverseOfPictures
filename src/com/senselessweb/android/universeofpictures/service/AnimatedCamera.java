@@ -1,81 +1,12 @@
 package com.senselessweb.android.universeofpictures.service;
 
-import android.util.Log;
-
-import com.threed.jpct.Camera;
 import com.threed.jpct.SimpleVector;
 
-public class AnimatedCamera
+public interface AnimatedCamera
 {
-	private static final SimpleVector startPosition = new SimpleVector(0, 0, 0);
-	
-	private static AnimatedCamera instance;
-	
-	private final Camera camera;
-	
-	private BezierBasedCameraAnimation animatedTranslation = null;
-	
-	public AnimatedCamera(final Camera camera)
-	{
-		this.camera = camera;
-		this.camera.setPosition(startPosition);
-	}
-	
-	public static void init(final Camera camera)
-	{
-		instance = new AnimatedCamera(camera);
-	}
-	
-	public static AnimatedCamera getInstance()
-	{
-		if (instance == null) 
-			throw new IllegalStateException("AnimatedCamera has not been initialized. Call init() first"); 
-		return instance;
-	}
-	
-	public synchronized void moveTo(final SimpleVector newPosition, final SimpleVector newDirection)
-	{
-		Log.i("AnimatedCamera", "Moving to: " + newPosition + ", " + newDirection);
 
-		if (this.animatedTranslation != null)
-		{
-			// Skip everything if we are already on target, stop the current animation if we are not
-			if (this.animatedTranslation.getTargetPosition().equals(newPosition)) return;
-			else this.animatedTranslation.stop();
-		}
-		
-		this.animatedTranslation = new BezierBasedCameraAnimation(
-				this.camera.getPosition(), this.camera.getDirection(),
-				newPosition, newDirection, this.camera.getUpVector(),
-				20000)
-		{
-			
-			@Override
-			public void animatePosition(final SimpleVector positon)
-			{
-				AnimatedCamera.this.camera.setPosition(positon);
-			}
+	public void moveTo(final SimpleVector newPosition, final SimpleVector newDirection);
 
-			@Override
-			public void animateOrientation(final SimpleVector direction, final SimpleVector up)
-			{
-				AnimatedCamera.this.camera.setOrientation(direction, up);
-			}
+	public void moveToStartPosition();
 
-			@Override
-			public void animateLookAt(final SimpleVector lookAt)
-			{
-				AnimatedCamera.this.camera.lookAt(lookAt);
-			}
-			
-		};
-		
-		this.animatedTranslation.start();
-	}
-
-	public void moveToStartPosition()
-	{
-		this.moveTo(startPosition, new SimpleVector(0f, 0f, 1f));
-	}
-	
 }

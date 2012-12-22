@@ -1,16 +1,18 @@
 package com.senselessweb.android.universeofpictures.scene.objects;
 
 import com.senselessweb.android.universeofpictures.domain.AlbumPicture;
-import com.senselessweb.android.universeofpictures.service.TextureLoader;
+import com.senselessweb.android.universeofpictures.scene.Scene;
+import com.senselessweb.android.universeofpictures.service.TextureService;
 import com.threed.jpct.Matrix;
 import com.threed.jpct.Object3D;
 import com.threed.jpct.Primitives;
-import com.threed.jpct.World;
 
 public class RenderablePicture extends Object3D implements TouchableObject
 {
 
 	private static final long serialVersionUID = -3909155293063304533L;
+	
+	private final TextureService textureService;
 	
 	private final AlbumPicture picture;
 	
@@ -18,9 +20,11 @@ public class RenderablePicture extends Object3D implements TouchableObject
 	
 	private final Object3D backside;
 	
-	public RenderablePicture(final World world, final AlbumPicture picture, final float distance, final float angle)
+	public RenderablePicture(final Scene scene, final TextureService textureService, 
+			final AlbumPicture picture, final float distance, final float angle)
 	{
 		super(Primitives.getPlane(2, 1f));
+		this.textureService = textureService;
 		
 		this.backside = Primitives.getPlane(2, 1f);
 		this.backside.rotateY((float) Math.PI);
@@ -39,8 +43,8 @@ public class RenderablePicture extends Object3D implements TouchableObject
 		
 		this.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
 		
-		world.addObject(this);
-		world.addObject(backside);
+		scene.addObject3D(this);
+		scene.addObject3D(backside);
 	}
 
 	@Override
@@ -64,7 +68,7 @@ public class RenderablePicture extends Object3D implements TouchableObject
 		{
 			if (!this.textureLoaded)
 			{
-				TextureLoader.getInstance().applyTexture(this, picture);
+				this.textureService.applyTexture(this, picture);
 				this.textureLoaded = true;
 			}
 		}

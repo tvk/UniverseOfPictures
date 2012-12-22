@@ -1,4 +1,4 @@
-package com.senselessweb.android.universeofpictures.service;
+package com.senselessweb.android.universeofpictures.service.impl;
 
 import static java.lang.Math.pow;
 
@@ -15,7 +15,7 @@ import com.threed.jpct.SimpleVector;
  * 
  * @author thomas
  */
-public abstract class BezierBasedCameraAnimation implements Runnable
+abstract class BezierBasedCameraAnimation implements Runnable
 {
 
 	// Bezier coordinates as defined here:

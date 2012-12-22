@@ -1,10 +1,10 @@
-package com.senselessweb.android.universeofpictures.service;
+package com.senselessweb.android.universeofpictures.scene.objects;
 
 import java.util.concurrent.Executors;
 
 import com.threed.jpct.Object3D;
 
-public class Rotator implements Runnable
+class Rotator implements Runnable
 {
 	public enum Axis
 	{

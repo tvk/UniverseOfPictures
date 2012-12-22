@@ -2,8 +2,12 @@ package com.senselessweb.android.universeofpictures.scene;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -23,6 +27,7 @@ import com.senselessweb.android.universeofpictures.service.AnimatedCamera;
 import com.threed.jpct.FrameBuffer;
 import com.threed.jpct.Interact2D;
 import com.threed.jpct.Light;
+import com.threed.jpct.Object3D;
 import com.threed.jpct.RGBColor;
 import com.threed.jpct.SimpleVector;
 import com.threed.jpct.Texture;
@@ -32,11 +37,12 @@ import com.threed.jpct.util.BitmapHelper;
 import com.threed.jpct.util.MemoryHelper;
 import com.threed.jpct.util.SkyBox;
 
-public class RenderableScene extends World implements Renderer
+@Singleton
+public class RenderableScene extends World implements Scene, Renderer
 {
 
 	private static final long serialVersionUID = -9075219920811753949L;
-
+	
 	private FrameBuffer frameBuffer = null;
 
 	private final SkyBox skybox;
@@ -51,9 +57,18 @@ public class RenderableScene extends World implements Renderer
 	
 	private boolean wasMoving = false;
 
-	public RenderableScene(final Context context)
+	@Inject
+	public RenderableScene(
+			final AlbumService albumService,
+			final Provider<Context> contextProvider,
+			final AnimatedCamera camera)
 	{
-		final Texture skyTexture = new Texture(BitmapHelper.rescale(BitmapHelper.convert(context.getResources().getDrawable(R.drawable.sky)), 2048, 2048));
+		Log.i(this.toString(), "init called...");
+		
+		this.albumService = albumService;
+		
+		final Texture skyTexture = new Texture(BitmapHelper.rescale(BitmapHelper.convert(
+				contextProvider.get().getResources().getDrawable(R.drawable.sky)), 2048, 2048));
 		TextureManager.getInstance().addTexture("sky", skyTexture);
 		this.skybox = new SkyBox("sky", "sky", "sky", "sky", "sky", "sky", 2000);
 
@@ -61,10 +76,7 @@ public class RenderableScene extends World implements Renderer
 		this.sun.setPosition(new SimpleVector(10000, 0, -2000));
 		this.sun.setIntensity(255f, 255f, 255f);
 		
-		this.albumService = new AlbumService(context, this);
 		this.addObjects(this.albumService.getAlbums().toArray(new RenderableAlbum[0]));
-		
-		AnimatedCamera.init(this.getCamera());
 		
 		MemoryHelper.compact();
 	}
@@ -89,7 +101,7 @@ public class RenderableScene extends World implements Renderer
 
 	public synchronized void onTouch(final GLSurfaceView view, final MotionEvent event, final ImageView pictureView)
 	{
-		Log.d("RenderableScene", "TouchEvent: " + event);
+		Log.d(this.toString(), "TouchEvent: " + event);
 		
 		if (event.getAction() == MotionEvent.ACTION_DOWN)
 		{
@@ -109,7 +121,7 @@ public class RenderableScene extends World implements Renderer
 				
 				final float angleDiff = angleNew - angleOld;
 
-				Log.i("RenderableScene", "Rotating camera by " + angleDiff + " angleOld: " + angleOld + ", angleNew: " + angleNew);
+				Log.i(this.toString(), "Rotating camera by " + angleDiff + " angleOld: " + angleOld + ", angleNew: " + angleNew);
 				if (!Float.isNaN(angleDiff)) this.getCamera().rotateCameraZ(angleDiff);
 			}
 			
@@ -144,7 +156,7 @@ public class RenderableScene extends World implements Renderer
 			final int y = (int) event.getY();
 			final SimpleVector dir = Interact2D.reproject2D3DWS(this.getCamera(), this.frameBuffer, x, y).normalize();
 			final Object[] res = this.calcMinDistanceAndObject3D(this.getCamera().getPosition(), dir, 100000);
-			Log.i("RenderableScene", "Located object (Dir: " + dir + "): " + Arrays.toString(res));
+			Log.i(this.toString(), "Located object (Dir: " + dir + "): " + Arrays.toString(res));
 			
 			// Touchable objects handle events by their self
 			if (res[1] instanceof TouchableObject && this.lastTouchedObject != res[1])
@@ -168,8 +180,6 @@ public class RenderableScene extends World implements Renderer
 	
 	public void onBackPressed()
 	{
-		AnimatedCamera.getInstance().moveToStartPosition();
-		
 		for (final RenderableAlbum album : this.albumService.getAlbums())
 			album.setPicturesVisibilityState(false);
 	}
@@ -177,5 +187,15 @@ public class RenderableScene extends World implements Renderer
 	@Override
 	public void onSurfaceCreated(final GL10 gl, final EGLConfig config) { }
 	
+	@Override
+	public void addObject3D(final Object3D object)
+	{
+		this.addObject(object);
+	}
+	
+	public void addObject3Ds(final Collection<Object3D> objects) 
+	{
+		this.addObjects(objects.toArray(new Object3D[objects.size()])); 
+	}
 	
 }
